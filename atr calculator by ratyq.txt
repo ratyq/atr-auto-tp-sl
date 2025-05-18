@@ -1,0 +1,37 @@
+//@version=5
+indicator("ATR Auto TP/SL Calculator by ratyq", overlay=true)
+
+// Inputs
+atrLength = input(14, "ATR Period")
+slMultiplier = input(2.0, "Stop Loss Multiplier")
+tpMultiplier = input(3.0, "Take Profit Multiplier")
+
+// Calculate ATR
+atrValue = ta.atr(atrLength)
+
+// Get current price on mouse hover
+var float hoverPrice = na
+if barstate.islast and not na(close)
+    hoverPrice := close
+
+// Calculate levels when hovering
+slLong = hoverPrice - (slMultiplier * atrValue)
+tpLong = hoverPrice + (tpMultiplier * atrValue)
+slShort = hoverPrice + (slMultiplier * atrValue)
+tpShort = hoverPrice - (tpMultiplier * atrValue)
+
+// Plotting
+plot(hoverPrice, "Entry Price", color=color.blue, linewidth=2, trackprice=true)
+plot(slLong, "SL Long", color=color.red, linewidth=2)
+plot(tpLong, "TP Long", color=color.green, linewidth=2)
+plot(slShort, "SL Short", color=color.red, linewidth=2)
+plot(tpShort, "TP Short", color=color.green, linewidth=2)
+
+// Display tooltip
+if barstate.islast and not na(hoverPrice)
+    labelText = "Entry: " + str.tostring(hoverPrice) + 
+              "\nSL Long: " + str.tostring(slLong) + 
+              "\nTP Long: " + str.tostring(tpLong) +
+              "\nSL Short: " + str.tostring(slShort) +
+              "\nTP Short: " + str.tostring(tpShort)
+    label.new(bar_index, hoverPrice, labelText, style=label.style_label_left, color=color.new(color.blue, 90), textcolor=color.white)
